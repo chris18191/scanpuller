@@ -4,7 +4,7 @@ export { }
 
 const HOST = "http://192.168.17.179"
 const WATCH_PATH = "/DCIM/100HPAIO/"
-const DOWNLOAD_FOLDER = "./download/"
+const DOWNLOAD_FOLDER = "/download/"
 
 type FileEntry = {fileName:string, fileSize: number}
 
