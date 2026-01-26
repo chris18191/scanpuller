@@ -9,13 +9,16 @@ const DOWNLOAD_FOLDER = "/download/"
 type FileEntry = {fileName:string, fileSize: number}
 
 async function getFiles() : Promise<FileEntry[]> {
+    console.log("Trying to get files...")
     const file_response = await fetch(HOST + WATCH_PATH, {
         method: "GET"
     });
+    console.log("Got response: ")
 
     // console.log("Received: ", file_response)
     const body = await file_response.text();
 
+    console.log("Parsing response...")
     // Extract table rows using a simple HTML parser
     const rows: FileEntry[] = [];
     // Skip all body content before the first row and
@@ -42,7 +45,9 @@ async function getFiles() : Promise<FileEntry[]> {
 async function processFile(file: FileEntry) {
     // #### Process files
     // Download file
-    const file_content = await (await fetch(HOST + WATCH_PATH + file.fileName)).blob();
+    const response = await fetch(HOST + WATCH_PATH + file.fileName)
+    console.log("Parsing response...")
+    const file_content = await response.blob();
     // Write file
     Bun.write(DOWNLOAD_FOLDER + file.fileName, file_content)
     // Delete file from server
@@ -51,13 +56,16 @@ async function processFile(file: FileEntry) {
 }
 
 while (true) {
-    const files = await getFiles();
-    for (const file of files) {
-        if (file.fileSize == 0){
-            continue
+    try {
+        const files = await getFiles();
+        for (const file of files) {
+            if (file.fileSize == 0){
+                continue
+            }
+            processFile(file)
         }
-        processFile(file)
+        await sleep(5_000)
+    } catch (error) {
+        await sleep(60_000)
     }
-
-    await sleep(5000)
 }
