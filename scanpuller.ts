@@ -4,8 +4,6 @@ export { }
 
 const HOST = Bun.env.PULLER_HOST
 const WATCH_PATH = Bun.env.PULLER_WATCH_PATH
-//"/DCIM/100HPAIO/"
-// const DOWNLOAD_FOLDER = "/download/"
 const DOWNLOAD_FOLDER = Bun.env.PULLER_DOWNLOAD_FOLDER || "/download/"
 
 const SLEEP_BETWEEN_PINGS = Bun.env.PULLER_SLEEP_BETWEEN_PINGS || 60_000
@@ -48,7 +46,6 @@ async function getFiles() : Promise<FileEntry[]> {
 }
 
 async function processFile(file: FileEntry) {
-    // #### Process files
     // Download file
     const response = await fetch(HOST + WATCH_PATH + file.fileName)
     console.log("Parsing response...")
@@ -71,11 +68,12 @@ if (WATCH_PATH === undefined){
     err = true;
 }
 
+console.log("Reading from server " + HOST + " at path '" + WATCH_PATH + "'.");
+console.log("Files will be placed in '" + DOWNLOAD_FOLDER + "'");
+console.log("Wait time between pings is " + SLEEP_BETWEEN_PINGS)
+console.log("Wait time between scans is " + SLEEP_BETWEEN_SCANS)
+
 while (true) {
-    console.log("Reading from server " + HOST + " at path '" + WATCH_PATH + "'.");
-    console.log("Files will be placed in '" + DOWNLOAD_FOLDER + "'");
-    console.log("Wait time between pings is " + SLEEP_BETWEEN_PINGS)
-    console.log("Wait time between scans is " + SLEEP_BETWEEN_SCANS)
 
     if (err) {
         console.log("Exiting due to errors...");
