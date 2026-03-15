@@ -2,9 +2,14 @@ import { sleep } from "bun"
 
 export { }
 
-const HOST = "http://192.168.17.179"
-const WATCH_PATH = "/DCIM/100HPAIO/"
-const DOWNLOAD_FOLDER = "/download/"
+const HOST = Bun.env.PULLER_HOST
+const WATCH_PATH = Bun.env.PULLER_WATCH_PATH
+//"/DCIM/100HPAIO/"
+// const DOWNLOAD_FOLDER = "/download/"
+const DOWNLOAD_FOLDER = Bun.env.PULLER_DOWNLOAD_FOLDER || "/download/"
+
+const SLEEP_BETWEEN_PINGS = Bun.env.PULLER_SLEEP_BETWEEN_PINGS || 60_000
+const SLEEP_BETWEEN_SCANS = Bun.env.PULLER_SLEEP_BETWEEN_SCANS || 5_000
 
 type FileEntry = {fileName:string, fileSize: number}
 
@@ -55,7 +60,27 @@ async function processFile(file: FileEntry) {
     console.log("Processed file: ", file.fileName)
 }
 
+var err = false;
+
+if (HOST === undefined){
+    console.error("Missing env variable: 'PULLER_HOST' needs to be defined (e.g. PULLER_HOST=192.168.1.100)");
+    err = true;
+}
+if (WATCH_PATH === undefined){
+    console.error("Missing env variable: 'PULLER_WATCH_PATH' needs to be defined (e.g. PULLER_WATCH_PATH=/files/scanresults)");
+    err = true;
+}
+
 while (true) {
+    console.log("Reading from server " + HOST + " at path '" + WATCH_PATH + "'.");
+    console.log("Files will be placed in '" + DOWNLOAD_FOLDER + "'");
+    console.log("Wait time between pings is " + SLEEP_BETWEEN_PINGS)
+    console.log("Wait time between scans is " + SLEEP_BETWEEN_SCANS)
+
+    if (err) {
+        console.log("Exiting due to errors...");
+        break;
+    }
     try {
         const files = await getFiles();
         for (const file of files) {
@@ -64,8 +89,8 @@ while (true) {
             }
             processFile(file)
         }
-        await sleep(5_000)
+        await sleep(SLEEP_BETWEEN_SCANS)
     } catch (error) {
-        await sleep(60_000)
+        await sleep(SLEEP_BETWEEN_PINGS)
     }
 }
