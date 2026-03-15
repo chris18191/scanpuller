@@ -6,8 +6,8 @@ const HOST = Bun.env.PULLER_HOST
 const WATCH_PATH = Bun.env.PULLER_WATCH_PATH
 const DOWNLOAD_FOLDER = Bun.env.PULLER_DOWNLOAD_FOLDER || "/download/"
 
-const SLEEP_BETWEEN_PINGS = Bun.env.PULLER_SLEEP_BETWEEN_PINGS || 60_000
-const SLEEP_BETWEEN_SCANS = Bun.env.PULLER_SLEEP_BETWEEN_SCANS || 5_000
+const SLEEP_BETWEEN_PINGS = parseInt(Bun.env.PULLER_SLEEP_BETWEEN_PINGS) || 60_000
+const SLEEP_BETWEEN_SCANS = parseInt(Bun.env.PULLER_SLEEP_BETWEEN_SCANS) || 5_000
 
 type FileEntry = {fileName:string, fileSize: number}
 
@@ -85,7 +85,7 @@ while (true) {
             if (file.fileSize == 0){
                 continue
             }
-            processFile(file)
+            await processFile(file)
         }
         await sleep(SLEEP_BETWEEN_SCANS)
     } catch (error) {
